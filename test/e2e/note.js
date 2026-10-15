@@ -25,11 +25,11 @@ export function opened(kit) {
  *
  * @param {object} kit - book kit
  * @param {string} parent - parent node
- * @returns {string} bay identifier
+ * @returns {Promise<string>} bay identifier
  */
-export function hang(kit, parent) {
+export async function hang(kit, parent) {
     const id = `bay-${Math.random()}`;
-    kit.include(note({ id, holder: parent }));
+    await kit.include(note({ id, holder: parent }));
     return id;
 }
 
@@ -40,10 +40,10 @@ export function hang(kit, parent) {
  * @param {string} plant - plant node
  * @param {object} attrs - attributes
  * @param {string} holder - holder node
- * @returns {{ id: string, stock: object }} item and snapshot
+ * @returns {Promise<{ id: string, stock: object }>} item and snapshot
  */
-export function sample(kit, plant, attrs, holder) {
+export async function sample(kit, plant, attrs, holder) {
     const id = `unit-${Math.random()}`;
-    const stock = kit.register(note({ id, kind: 'sample', attrs, holder: holder || plant }));
+    const stock = await kit.register(note({ id, kind: 'sample', attrs, holder: holder || plant }));
     return { id, stock };
 }

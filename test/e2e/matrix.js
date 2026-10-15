@@ -16,8 +16,8 @@ export default function matrix(factories, rows) {
     factories.forEach((factory) => {
         describe(factory.name, function() {
             rows.forEach((row) => {
-                it(row[0], function() {
-                    assertThat(row[1](factory.spawn()), row[2](), row[0]);
+                it(row[0], async function() {
+                    assertThat(await row[1](factory.spawn()), row[2](), row[0]);
                 });
             });
         });
