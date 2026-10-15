@@ -20,7 +20,7 @@ export default function itemRoute(basePath, ledger) {
             }) }).send(res);
         }),
         route('GET', `${basePath}/items/:id`, (req, res, params) => {
-            shown(res, ledger.load(), params.id);
+            shown(res, ledger.load(), decodeURIComponent(params.id));
         })
     ];
 }

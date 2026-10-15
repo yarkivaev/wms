@@ -20,7 +20,8 @@ export default function holderRoute(basePath, ledger) {
             }) }).send(res);
         }),
         route('GET', `${basePath}/holders/:id`, (req, res, params) => {
-            jsonResponse({ id: params.id, path: traced(ledger.load(), params.id) }).send(res);
+            const id = decodeURIComponent(params.id);
+            jsonResponse({ id, path: traced(ledger.load(), id) }).send(res);
         })
     ];
 }

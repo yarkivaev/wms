@@ -49,6 +49,21 @@ describe('wmsApi', function() {
         assert.equal(body.entries.length, 1, 'the kind filter dropped the mismatch line');
     });
 
+    it('finds an item when the identifier is percent-encoded', async function() {
+        const plant = `plant-${Math.random()}`;
+        const id = `Ф-${Math.random()}`;
+        const ledger = memoryLedger(plant);
+        const api = wmsApi('/wms', ledger, allowed);
+        ledger.save(register(ledger.load(), note({
+            id,
+            kind: 'sample',
+            attrs: { lot: 'к' },
+            holder: plant
+        })));
+        const { body } = await exchange(api, 'GET', `/wms/items/${encodeURIComponent(id)}`);
+        assert.equal(body.item.id, id, 'a percent-encoded item identifier was not found');
+    });
+
     it('answers an empty path for a holder that is not in the tree', async function() {
         const plant = `plant-${Math.random()}`;
         const missing = `bay-${Math.random()}`;
