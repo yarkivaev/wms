@@ -123,6 +123,26 @@ Every mutation uses the same envelope: `key`, `at`, `actor`, and the fields of t
 - `retire(book, { key, id, at, actor })` — claim to retire an item and leave it on the same node
 - `accept(book, { key, id, holder, attrs, at, actor })` — `place` claim: move the item to the claimed node when the snapshot matches
 
+## HTTP
+
+`wmsApi(basePath, ledger, granted)` is a `plantApi`-style route factory on `@yarkivaev/simple-server`. The plant package names kinds and holders. Who may write is the injected `granted` predicate, not a role of this package. Tests use `memoryLedger`. Postgres jsonb is a later adapter with the same `load` / `save` pair.
+
+```javascript
+import { memoryLedger, wmsApi } from '@yarkivaev/wms';
+
+const ledger = memoryLedger('plant');
+const api = wmsApi('/wms', ledger, (req) => {
+    return req.headers['remote-groups'] === 'wms';
+});
+```
+
+- `GET {base}/items`, `GET {base}/items/:id` — snapshots and holder path
+- `GET {base}/holders`, `GET {base}/holders/:id` — tree nodes and path from the plant
+- `GET {base}/entries?kind=` — journal, optional kind filter
+- `POST {base}/include|register|revise|retire|place` — one claim, `actor` in the body
+
+A refused write does not file a claim.
+
 ## CI/CD
 
 GitHub Actions via `yarkivaev/npm-workflows` (lint, test, version check). A push to `main` tags `v*` and publishes `@yarkivaev/wms` to npm.

@@ -8,7 +8,7 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 **Do not** put factory/Sokol melting domain here: moulds, diameters, casting sections, caster desks, or plant-specific attribute keys. Those belong in a plant package.
 
-Allowed: opaque `kind` strings and domain-agnostic commands such as `register`, `revise`, `retire`, `include`, and `accept`.
+Allowed: opaque `kind` strings, domain-agnostic commands such as `register`, `revise`, `retire`, `include`, and `accept`, and generic HTTP (`wmsApi`) with an injected write predicate.
 
 If a change needs mould or shop semantics, implement it in the plant package and call these commands from there.
 
@@ -29,10 +29,14 @@ GitHub repository `yarkivaev/wms`. PR CI: `npm-workflows` ci.yml (version check,
 
 ```
 wms/
-  src/domain/         book, item, claim, tree, journal entry
-  test/domain/        unit tests
-  test/e2e/           contracts, scenes, matchers, kit factories
-  index.js            public API facade
+  src/domain/                      book, item, claim, tree, journal entry
+  src/application/wmsApi.js        HTTP route factory
+  src/infrastructure/http/         item, holder, entry, claim routes
+  src/infrastructure/persistence/  memoryLedger
+  test/domain/                     unit tests
+  test/e2e/                        contracts, scenes, matchers, memory and http kits
+  test/infrastructure/http/        access and GET contracts
+  index.js                         public API facade
 ```
 
 ## Domain
