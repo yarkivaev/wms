@@ -13,14 +13,14 @@ import { path as walk } from '../../domain/book.js';
  */
 export default function itemRoute(basePath, ledger) {
     return [
-        route('GET', `${basePath}/items`, (req, res) => {
-            const stock = ledger.load();
+        route('GET', `${basePath}/items`, async (req, res) => {
+            const stock = await ledger.load();
             jsonResponse({ items: stock.items.map((row) => {
                 return listed(stock, row);
             }) }).send(res);
         }),
-        route('GET', `${basePath}/items/:id`, (req, res, params) => {
-            shown(res, ledger.load(), decodeURIComponent(params.id));
+        route('GET', `${basePath}/items/:id`, async (req, res, params) => {
+            shown(res, await ledger.load(), decodeURIComponent(params.id));
         })
     ];
 }

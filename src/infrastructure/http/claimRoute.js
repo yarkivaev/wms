@@ -51,7 +51,15 @@ async function posted(req, res, ledger, granted, command) {
         errorResponse('FORBIDDEN', `write role required for ${req.method}`, 403).send(res);
         return;
     }
-    const next = command(ledger.load(), await claimed(req));
-    ledger.save(next);
+    const next = command(await ledger.load(), await claimed(req));
+    try {
+        await ledger.save(next);
+    } catch (error) {
+        if (error.code !== 'VERSION') {
+            throw error;
+        }
+        errorResponse('CONFLICT', 'book was rewritten', 409).send(res);
+        return;
+    }
     jsonResponse(packed(next)).send(res);
 }

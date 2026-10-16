@@ -125,12 +125,12 @@ Every mutation uses the same envelope: `key`, `at`, `actor`, and the fields of t
 
 ## HTTP
 
-`wmsApi(basePath, ledger, granted)` is a `plantApi`-style route factory on `@yarkivaev/simple-server`. The plant package names kinds and holders. Who may write is the injected `granted` predicate, not a role of this package. Tests use `memoryLedger`. Postgres jsonb is a later adapter with the same `load` / `save` pair.
+`wmsApi(basePath, ledger, granted)` is a `plantApi`-style route factory on `@yarkivaev/simple-server`. The plant package names kinds and holders. Who may write is the injected `granted` predicate, not a role of this package. Routes `await` `ledger.load` / `ledger.save`. `memoryLedger` is sync. `postgresLedger(pool, plant)` is the jsonb adapter: one row per plant, optimistic `version`. Inject a `pg.Pool` or any queryable; this package does not depend on `pg`.
 
 ```javascript
-import { memoryLedger, wmsApi } from '@yarkivaev/wms';
+import { postgresLedger, wmsApi } from '@yarkivaev/wms';
 
-const ledger = memoryLedger('plant');
+const ledger = postgresLedger(pool, 'plant');
 const api = wmsApi('/wms', ledger, (req) => {
     return req.headers['remote-groups'] === 'wms';
 });
@@ -141,7 +141,7 @@ const api = wmsApi('/wms', ledger, (req) => {
 - `GET {base}/entries?kind=` — journal, optional kind filter
 - `POST {base}/include|register|revise|retire|place` — one claim, `actor` in the body
 
-A refused write does not file a claim.
+A refused write does not file a claim. A POST answers 409 when the stored book version moved.
 
 ## CI/CD
 

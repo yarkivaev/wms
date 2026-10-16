@@ -13,15 +13,15 @@ import { path as walk } from '../../domain/book.js';
  */
 export default function holderRoute(basePath, ledger) {
     return [
-        route('GET', `${basePath}/holders`, (req, res) => {
-            const stock = ledger.load();
+        route('GET', `${basePath}/holders`, async (req, res) => {
+            const stock = await ledger.load();
             jsonResponse({ holders: stock.tree.nodes.map((row) => {
                 return located(stock, row);
             }) }).send(res);
         }),
-        route('GET', `${basePath}/holders/:id`, (req, res, params) => {
+        route('GET', `${basePath}/holders/:id`, async (req, res, params) => {
             const id = decodeURIComponent(params.id);
-            jsonResponse({ id, path: traced(ledger.load(), id) }).send(res);
+            jsonResponse({ id, path: traced(await ledger.load(), id) }).send(res);
         })
     ];
 }

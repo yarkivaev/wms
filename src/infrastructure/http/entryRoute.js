@@ -12,9 +12,10 @@ import { jsonResponse, route } from '@yarkivaev/simple-server';
  */
 export default function entryRoute(basePath, ledger) {
     return [
-        route('GET', `${basePath}/entries`, (req, res) => {
+        route('GET', `${basePath}/entries`, async (req, res) => {
             const kind = new URL(req.url, 'http://wms.local').searchParams.get('kind');
-            jsonResponse({ entries: picked(ledger.load().entries, kind) }).send(res);
+            const stock = await ledger.load();
+            jsonResponse({ entries: picked(stock.entries, kind) }).send(res);
         })
     ];
 }

@@ -32,12 +32,17 @@ wms/
   src/domain/                      book, item, claim, tree, journal entry
   src/application/wmsApi.js        HTTP route factory
   src/infrastructure/http/         item, holder, entry, claim routes
-  src/infrastructure/persistence/  memoryLedger
+  src/infrastructure/persistence/  memoryLedger, postgresLedger(pool, plant)
   test/domain/                     unit tests
   test/e2e/                        contracts, scenes, matchers, memory and http kits
-  test/infrastructure/http/        access and GET contracts
+  test/infrastructure/http/        access, GET, and 409 contracts
+  test/infrastructure/persistence/ postgresLedger fakes and testcontainers
   index.js                         public API facade
 ```
+
+## Persistence
+
+`memoryLedger(rootId)` and `postgresLedger(pool, plant)` share `load` / `save`. Postgres stores one jsonb row per plant and increments `version` on save. Inject a `pg.Pool`; this package does not depend on `pg`. HTTP POST answers 409 when the stored version moved.
 
 ## Domain
 

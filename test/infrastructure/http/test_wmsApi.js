@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { register } from '../../../src/domain/book.js';
+import { book, register } from '../../../src/domain/book.js';
 import wmsApi from '../../../src/application/wmsApi.js';
 import memoryLedger from '../../../src/infrastructure/persistence/memoryLedger.js';
 import { exchange } from '../../e2e/exchange.js';
@@ -71,7 +71,38 @@ describe('wmsApi', function() {
         const { body } = await exchange(api, 'GET', `/wms/holders/${encodeURIComponent(missing)}`);
         assert.deepEqual(body.path, [], 'a missing holder returned a path');
     });
+
+    it('does not file a claim when the book was rewritten', async function() {
+        const plant = `plant-${Math.random()}`;
+        const api = wmsApi('/wms', conflicted(plant), allowed);
+        const { status } = await exchange(api, 'POST', '/wms/register', note({
+            id: `unit-${Math.random()}`,
+            kind: 'sample',
+            attrs: { lot: 'к' },
+            holder: plant
+        }));
+        assert.equal(status, 409, 'a rewritten book was accepted');
+    });
 });
+
+/**
+ * Ledger whose save reports an optimistic-lock failure.
+ *
+ * @param {string} plant - plant identifier
+ * @returns {object} frozen ledger
+ */
+function conflicted(plant) {
+    return Object.freeze({
+        async load() {
+            return book(plant);
+        },
+        async save() {
+            const error = new Error(`book was rewritten ${plant}`);
+            error.code = 'VERSION';
+            throw error;
+        }
+    });
+}
 
 /**
  * Refuses every write.
