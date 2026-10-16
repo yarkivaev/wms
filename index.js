@@ -12,3 +12,4 @@ export { book, include, path, register, revise, retire, accept } from './src/dom
 export { default as wmsApi } from './src/application/wmsApi.js';
 export { default as memoryLedger } from './src/infrastructure/persistence/memoryLedger.js';
 export { default as postgresLedger } from './src/infrastructure/persistence/postgresLedger.js';
+export { default as windowed } from './src/infrastructure/http/windowed.js';

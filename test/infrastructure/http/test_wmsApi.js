@@ -35,6 +35,28 @@ describe('wmsApi', function() {
         assert.deepEqual(body.items[0].path, [plant], 'the item list dropped the plant path');
     });
 
+    it('windows the item list after a cursor', async function() {
+        const plant = `plant-${Math.random()}`;
+        const first = `unit-${Math.random()}`;
+        const second = `unit-${Math.random()}`;
+        const ledger = memoryLedger(plant);
+        const api = wmsApi('/wms', ledger, allowed);
+        ledger.save(register(ledger.load(), note({
+            id: first,
+            kind: 'sample',
+            attrs: { lot: 'к' },
+            holder: plant
+        })));
+        ledger.save(register(ledger.load(), note({
+            id: second,
+            kind: 'sample',
+            attrs: { lot: 'к' },
+            holder: plant
+        })));
+        const { body } = await exchange(api, 'GET', `/wms/items?limit=1&after=${encodeURIComponent(first)}`);
+        assert.equal(body.items[0].id, second, 'the item window repeated the cursor');
+    });
+
     it('keeps only mismatch journal lines when kind is set', async function() {
         const plant = `plant-${Math.random()}`;
         const ledger = memoryLedger(plant);

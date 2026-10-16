@@ -136,7 +136,8 @@ const api = wmsApi('/wms', ledger, (req) => {
 });
 ```
 
-- `GET {base}/items`, `GET {base}/items/:id` — snapshots and holder path
+- `GET {base}/items?limit=&after=&holder=&kind=&q=` — snapshots and holder path; `limit` windows after cursor `after`
+- `GET {base}/items/:id` — one snapshot and holder path
 - `GET {base}/holders`, `GET {base}/holders/:id` — tree nodes and path from the plant
 - `GET {base}/entries?kind=` — journal, optional kind filter
 - `POST {base}/include|register|revise|retire|place` — one claim, `actor` in the body

@@ -1,5 +1,6 @@
 import { errorResponse, jsonResponse, route } from '@yarkivaev/simple-server';
 import { path as walk } from '../../domain/book.js';
+import windowed from './windowed.js';
 
 /**
  * Snapshot routes. Each item carries the holder path from the plant.
@@ -13,11 +14,9 @@ import { path as walk } from '../../domain/book.js';
  */
 export default function itemRoute(basePath, ledger) {
     return [
-        route('GET', `${basePath}/items`, async (req, res) => {
+        route('GET', `${basePath}/items`, async (req, res, params, query) => {
             const stock = await ledger.load();
-            jsonResponse({ items: stock.items.map((row) => {
-                return listed(stock, row);
-            }) }).send(res);
+            jsonResponse(paged(stock, query || {})).send(res);
         }),
         route('GET', `${basePath}/items/:id`, async (req, res, params) => {
             shown(res, await ledger.load(), decodeURIComponent(params.id));
@@ -34,6 +33,59 @@ export default function itemRoute(basePath, ledger) {
  */
 function listed(stock, row) {
     return { ...row, path: walk(stock, row.holder) };
+}
+
+/**
+ * Filtered item page. A missing limit keeps the whole list.
+ *
+ * @param {object} stock - book
+ * @param {object} query - limit, after, holder, kind, q
+ * @returns {object} items and next cursor
+ */
+function paged(stock, query) {
+    const rows = stock.items.filter((row) => {
+        return kept(stock, row, query);
+    }).map((row) => {
+        return listed(stock, row);
+    });
+    const page = windowed(rows, 'id', query.after || '', Number(query.limit));
+    return { items: page.rows, next: page.next };
+}
+
+/**
+ * Whether an item matches holder, status and name query.
+ *
+ * @param {object} stock - book
+ * @param {object} row - item
+ * @param {object} query - holder, kind, q
+ * @returns {boolean} kept
+ */
+function kept(stock, row, query) {
+    const holder = query.holder || '';
+    const kind = query.kind || '';
+    const needle = query.q || '';
+    return within(stock, holder, row.holder)
+        && (kind === '' || row.status === kind)
+        && String(row.id).toLocaleLowerCase().includes(String(needle).toLocaleLowerCase());
+}
+
+/**
+ * Whether a holder sits on the selected node or below it.
+ *
+ * @param {object} stock - book
+ * @param {string} root - selected holder
+ * @param {string} holder - item holder
+ * @returns {boolean} kept
+ */
+function within(stock, root, holder) {
+    if (root === '') {
+        return true;
+    }
+    try {
+        return walk(stock, holder).includes(root);
+    } catch {
+        return false;
+    }
 }
 
 /**
