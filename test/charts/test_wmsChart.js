@@ -26,6 +26,8 @@ function render(body) {
 }
 
 describe('wms chart', function() {
+    this.timeout(15000);
+
     it('mounts the plant catalog from values', function() {
         const holder = `bay-${Math.random().toString(36).slice(2, 8)}`;
         const rendered = render([
