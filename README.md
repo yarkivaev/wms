@@ -144,6 +144,14 @@ const api = wmsApi('/wms', ledger, (req) => {
 
 A refused write does not file a claim. A POST answers 409 when the stored book version moved.
 
+## Helm
+
+`charts/wms` installs only the stock book: one `wms-site` Deployment, a Service, and a ConfigMap of the plant catalog at `WMS_PLANT_PATH`. Kinds, holder titles, and the image come from values. The chart does not create Postgres; `secret` must contain key `url` (`WMS_POSTGRES_URL`).
+
+```bash
+helm template book charts/wms --namespace wms --set image=example.invalid/wms:1
+```
+
 ## CI/CD
 
 GitHub Actions via `yarkivaev/npm-workflows` (lint, test, version check). A push to `main` tags `v*` and publishes `@yarkivaev/wms` to npm.
